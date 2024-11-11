@@ -28,7 +28,7 @@ This guide will help you create a repository like 'create-feliz-app' using Next.
 3. **Install dependencies:**
 
    ```sh
-   bun add next react react-dom fable-compiler fable-vite-plugin
+   bun add next react react-dom fable-compiler@^3.7.0 fable-vite-plugin@^2.0.0
    ```
 
 4. **Set up the project structure:**
