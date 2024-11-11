@@ -1,4 +1,4 @@
-# Feliz + Vite HMR + NextJs
+# WIP: Feliz + Vite HMR + NextJs
 
 ## Create a Feliz Next.js App using Vite and Bun
 
