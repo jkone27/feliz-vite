@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
-import reactRefresh from '@vitejs/plugin-react-refresh'
+import react from '@vitejs/plugin-react'
 import fable from 'fable-vite-plugin'
 
 export default defineConfig({
-    plugins: [reactRefresh(), fable()]
+    plugins: [react(), fable()]
 })
