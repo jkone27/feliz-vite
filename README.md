@@ -142,7 +142,7 @@ To run unit tests using `vitest`, follow these steps:
 1. **Install vitest and @vitest/ui:**
 
    ```sh
-   bun add -D vitest @vitest/ui
+   bun add -D vitest @vitest/ui@^0.1.0
    ```
 
 2. **Add a test script to `package.json`:**
