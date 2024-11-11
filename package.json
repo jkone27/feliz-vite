@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "vite preview"
+    "start": "vite preview",
+    "test": "vitest"
   },
   "dependencies": {
     "next": "^10.0.0",
@@ -17,6 +18,8 @@
   },
   "devDependencies": {
     "vite": "^2.0.0",
-    "@vitejs/plugin-react-refresh": "^1.0.0"
+    "@vitejs/plugin-react-refresh": "^1.0.0",
+    "vitest": "^0.0.0",
+    "@vitest/ui": "^0.0.0"
   }
 }
