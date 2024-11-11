@@ -134,3 +134,57 @@ This guide will help you create a repository like 'create-feliz-app' using Next.
     ```
 
 Your Feliz Next.js app using Vite and Bun should now be up and running!
+
+### Running Unit Tests
+
+To run unit tests using `vitest`, follow these steps:
+
+1. **Install vitest and @vitest/ui:**
+
+   ```sh
+   bun add -D vitest @vitest/ui
+   ```
+
+2. **Add a test script to `package.json`:**
+
+   ```json
+   {
+     "scripts": {
+       "test": "vitest"
+     }
+   }
+   ```
+
+3. **Create a `tests` directory in `src` and add a sample test file `SampleTest.fs`:**
+
+   ```fsharp
+   module SampleTest
+
+   open Fable.Mocha
+   open Fable.Core.JsInterop
+
+   let tests = testList "Sample Tests" [
+       testCase "1 + 1 equals 2" <| fun _ ->
+           Expect.equal (1 + 1) 2 "1 + 1 should equal 2"
+   ]
+
+   Mocha.runTests tests
+   ```
+
+4. **Configure vitest in `vite.config.ts` to include the `tests` directory:**
+
+   ```typescript
+   import { defineConfig } from 'vitest/config'
+
+   export default defineConfig({
+       test: {
+           include: ['src/tests/**/*.fs']
+       }
+   })
+   ```
+
+5. **Run the tests:**
+
+   ```sh
+   bun test
+   ```

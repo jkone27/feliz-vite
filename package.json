@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "vite preview"
+    "start": "vite preview",
+    "test": "vitest"
   },
   "dependencies": {
     "next": "^12.0.0",
@@ -14,6 +15,8 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "vitest": "^0.0.0",
+    "@vitest/ui": "^0.0.0"
     "vite": "^3.0.0",
     "@vitejs/plugin-react": "^2.0.0",
     "fable-compiler": "^3.7.0",
