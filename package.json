@@ -1,0 +1,22 @@
+{
+  "name": "feliz-nextjs-app",
+  "version": "1.0.0",
+  "description": "A Feliz Next.js app using Vite and Bun",
+  "main": "src/index.fs",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite preview"
+  },
+  "dependencies": {
+    "next": "^10.0.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "fable-compiler": "^3.0.0",
+    "fable-vite-plugin": "^1.0.0"
+  },
+  "devDependencies": {
+    "vite": "^2.0.0",
+    "@vitejs/plugin-react-refresh": "^1.0.0"
+  }
+}
