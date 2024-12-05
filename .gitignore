@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+## ignore obj and bin folders
+src/obj
+src/obj/*
+src/bin
+
+## ignore fable modules
+src/fable_modules

@@ -12,11 +12,34 @@ Currently, two official plugins are available (for react):
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 
-## Quick Use
+## npm
 
-clone via git or if you use bun
+clone via git to use with `npm`, you can then install and run as usual 
+
+```
+npm ci && npm run dev
+```
+
+## bun
+
+if you want to use `bun` 
 
 ```cli
 bun create jkone27/feliz-vite
 ```
 
+you can delete `package-lock.json` file then, to have dotnet tools installed correctly **cd** into your directory and run:
+
+```
+bun install -D --trust vite-plugin-fable
+```
+
+then 
+```
+bun install
+```
+
+then
+```
+bun run dev
+```
