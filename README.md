@@ -1,4 +1,4 @@
-# React + Vite + Feliz
+# Feliz Vite (a happy life)
 
 ![alt text](sample-splash-page.png)
 
@@ -14,6 +14,11 @@ Currently, two official plugins are available (for react):
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## special thanks 🦔
+- [ZaidAjaj](https://github.com/Zaid-Ajaj)
+- [Nojaf](https://github.com/nojaf)
+- [MangelMaxime](https://github.com/MangelMaxime)
 
 
 ## npm
