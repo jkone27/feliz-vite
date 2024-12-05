@@ -1,0 +1,87 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/App.fsproj": {}
+  },
+  "projects": {
+    "/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/App.fsproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/App.fsproj",
+        "projectName": "App",
+        "projectPath": "/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/App.fsproj",
+        "packagesPath": "/Users/admin/.nuget/packages/",
+        "outputPath": "/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/admin/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
+          "/usr/local/share/dotnet/sdk/9.0.100/FSharp/library-packs": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.pkg.github.com/xivart/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "restoreLockProperties": {
+          "restorePackagesWithLockFile": "false",
+          "nuGetLockFilePath": "VitePlugin.lock"
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "FSharp.Core": {
+              "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
+              "target": "Package",
+              "version": "[9.0.100, )",
+              "generatePathProperty": true
+            },
+            "Feliz": {
+              "target": "Package",
+              "version": "[2.9.0, )",
+              "generatePathProperty": true
+            },
+            "Feliz.Router": {
+              "target": "Package",
+              "version": "[4.0.0, )",
+              "generatePathProperty": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

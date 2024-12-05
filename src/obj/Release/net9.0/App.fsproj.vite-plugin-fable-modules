@@ -1,0 +1,1806 @@
+
+%
+m/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.Elmish.4.0.0/cmd.fs›$import { singleton, concat, map, empty, iterate } from "../../../node_modules/@fable-org/fable-library-js/List.js";
+import { singleton as singleton_1 } from "../../../node_modules/@fable-org/fable-library-js/AsyncBuilder.js";
+import { startImmediate, catchAsync } from "../../../node_modules/@fable-org/fable-library-js/Async.js";
+import { Timer_delay } from "./prelude.fs";
+
+/**
+ * Execute the commands using the supplied dispatcher
+ */
+export function Cmd_exec(onError, dispatch, cmd) {
+    iterate((call) => {
+        try {
+            call(dispatch);
+        }
+        catch (ex) {
+            onError(ex);
+        }
+    }, cmd);
+}
+
+/**
+ * None - no commands, also known as `[]`
+ */
+export function Cmd_none() {
+    return empty();
+}
+
+/**
+ * When emitting the message, map to another type
+ */
+export function Cmd_map(f, cmd) {
+    return map((g) => ((arg_1) => {
+        g((arg) => {
+            arg_1(f(arg));
+        });
+    }), cmd);
+}
+
+/**
+ * Aggregate multiple commands
+ */
+export function Cmd_batch(cmds) {
+    return concat(cmds);
+}
+
+/**
+ * Command to call the effect
+ */
+export function Cmd_ofEffect(effect) {
+    return singleton(effect);
+}
+
+/**
+ * Command to evaluate a simple function and map the result
+ * into success or error (of exception)
+ */
+export function Cmd_OfFunc_either(task, arg, ofSuccess, ofError) {
+    return singleton((dispatch) => {
+        try {
+            dispatch(ofSuccess(task(arg)));
+        }
+        catch (x) {
+            dispatch(ofError(x));
+        }
+    });
+}
+
+/**
+ * Command to evaluate a simple function and map the success to a message
+ * discarding any possible error
+ */
+export function Cmd_OfFunc_perform(task, arg, ofSuccess) {
+    return singleton((dispatch) => {
+        try {
+            dispatch(ofSuccess(task(arg)));
+        }
+        catch (x) {
+        }
+    });
+}
+
+/**
+ * Command to evaluate a simple function and map the error (in case of exception)
+ */
+export function Cmd_OfFunc_attempt(task, arg, ofError) {
+    return singleton((dispatch) => {
+        try {
+            task(arg);
+        }
+        catch (x) {
+            dispatch(ofError(x));
+        }
+    });
+}
+
+/**
+ * Command that will evaluate an async block and map the result
+ * into success or error (of exception)
+ */
+export function Cmd_OfAsyncWith_either(start, task, arg, ofSuccess, ofError) {
+    return singleton((arg_1) => {
+        start(singleton_1.Delay(() => singleton_1.Bind(catchAsync(task(arg)), (_arg) => {
+            const r = _arg;
+            arg_1((r.tag === 1) ? ofError(r.fields[0]) : ofSuccess(r.fields[0]));
+            return singleton_1.Zero();
+        })));
+    });
+}
+
+/**
+ * Command that will evaluate an async block and map the success
+ */
+export function Cmd_OfAsyncWith_perform(start, task, arg, ofSuccess) {
+    return singleton((arg_1) => {
+        start(singleton_1.Delay(() => singleton_1.Bind(catchAsync(task(arg)), (_arg) => {
+            const r = _arg;
+            if (r.tag === 0) {
+                arg_1(ofSuccess(r.fields[0]));
+                return singleton_1.Zero();
+            }
+            else {
+                return singleton_1.Zero();
+            }
+        })));
+    });
+}
+
+/**
+ * Command that will evaluate an async block and map the error (of exception)
+ */
+export function Cmd_OfAsyncWith_attempt(start, task, arg, ofError) {
+    return singleton((arg_1) => {
+        start(singleton_1.Delay(() => singleton_1.Bind(catchAsync(task(arg)), (_arg) => {
+            const r = _arg;
+            if (r.tag === 1) {
+                arg_1(ofError(r.fields[0]));
+                return singleton_1.Zero();
+            }
+            else {
+                return singleton_1.Zero();
+            }
+        })));
+    });
+}
+
+export function Cmd_OfAsync_start(x) {
+    Timer_delay(1, (_arg) => {
+        startImmediate(x);
+    });
+}
+
+/**
+ * Command to call `promise` block and map the results
+ */
+export function Cmd_OfPromise_either(task, arg, ofSuccess, ofError) {
+    return singleton((dispatch) => {
+        task(arg).then((arg_3) => {
+            dispatch(ofSuccess(arg_3));
+        }).catch((arg_2) => {
+            dispatch(ofError(arg_2));
+        });
+    });
+}
+
+/**
+ * Command to call `promise` block and map the success
+ */
+export function Cmd_OfPromise_perform(task, arg, ofSuccess) {
+    return singleton((dispatch) => {
+        task(arg).then((arg_1) => dispatch(ofSuccess(arg_1)));
+    });
+}
+
+/**
+ * Command to call `promise` block and map the error
+ */
+export function Cmd_OfPromise_attempt(task, arg, ofError) {
+    return singleton((dispatch) => {
+        task(arg).catch((arg_2) => {
+            dispatch(ofError(arg_2));
+        });
+    });
+}
+
+
+¼
+v/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.Elmish.4.0.0/cmd.obsolete.fsÁimport { singleton } from "../../../node_modules/@fable-org/fable-library-js/List.js";
+import { singleton as singleton_1 } from "../../../node_modules/@fable-org/fable-library-js/AsyncBuilder.js";
+
+/**
+ * Command to issue a specific message
+ */
+export function OfFunc_result(msg) {
+    return singleton((dispatch) => {
+        dispatch(msg);
+    });
+}
+
+/**
+ * Command that will evaluate an async block to the message
+ */
+export function OfAsyncWith_result(start, task) {
+    return singleton((arg) => {
+        start(singleton_1.Delay(() => singleton_1.Bind(task, (_arg) => {
+            arg(_arg);
+            return singleton_1.Zero();
+        })));
+    });
+}
+
+/**
+ * Command to dispatch the `promise` result
+ */
+export function OfPromise_result(task) {
+    return singleton((dispatch) => {
+        task.then(dispatch);
+    });
+}
+
+
+î
+q/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.Elmish.4.0.0/prelude.fsøimport { some } from "../../../node_modules/@fable-org/fable-library-js/Option.js";
+import Timer from "../../../node_modules/@fable-org/fable-library-js/Timer.js";
+import { add } from "../../../node_modules/@fable-org/fable-library-js/Observable.js";
+
+export function Log_onError(text, ex) {
+    console.error(some(text), ex);
+}
+
+export function Log_toConsole(text, o) {
+    console.log(some(text), o);
+}
+
+export function Timer_delay(interval, callback) {
+    let t;
+    let returnVal = new Timer(interval);
+    returnVal.AutoReset = false;
+    t = returnVal;
+    add(callback, t.Elapsed());
+    t.Enabled = true;
+    t.Start();
+}
+
+
+ßV
+q/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.Elmish.4.0.0/program.fséUimport { Record } from "../../../node_modules/@fable-org/fable-library-js/Types.js";
+import { record_type, bool_type, class_type, string_type, tuple_type, list_type, lambda_type, unit_type } from "../../../node_modules/@fable-org/fable-library-js/Reflection.js";
+import { Sub_Internal_Fx_change, Sub_Internal_diff, Sub_Internal_Fx_stop, Sub_Internal_empty, Sub_none } from "./sub.fs";
+import { curry3, curry2, uncurry2 } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+import { Log_toConsole, Log_onError } from "./prelude.fs";
+import { Cmd_exec, Cmd_none } from "./cmd.fs";
+import { map as map_1 } from "../../../node_modules/@fable-org/fable-library-js/List.js";
+import { RingBuffer$1__Pop, RingBuffer$1__Push_2B595, RingBuffer$1_$ctor_Z524259A4 } from "./ring.fs";
+import { value as value_2 } from "../../../node_modules/@fable-org/fable-library-js/Option.js";
+import { printf, toText } from "../../../node_modules/@fable-org/fable-library-js/String.js";
+
+export class Program$4 extends Record {
+    constructor(init, update, subscribe, view, setState, onError, termination) {
+        super();
+        this.init = init;
+        this.update = update;
+        this.subscribe = subscribe;
+        this.view = view;
+        this.setState = setState;
+        this.onError = onError;
+        this.termination = termination;
+    }
+}
+
+export function Program$4_$reflection(gen0, gen1, gen2, gen3) {
+    return record_type("Elmish.Program`4", [gen0, gen1, gen2, gen3], Program$4, () => [["init", lambda_type(gen0, tuple_type(gen1, list_type(lambda_type(lambda_type(gen2, unit_type), unit_type))))], ["update", lambda_type(gen2, lambda_type(gen1, tuple_type(gen1, list_type(lambda_type(lambda_type(gen2, unit_type), unit_type)))))], ["subscribe", lambda_type(gen1, list_type(tuple_type(list_type(string_type), lambda_type(lambda_type(gen2, unit_type), class_type("System.IDisposable")))))], ["view", lambda_type(gen1, lambda_type(lambda_type(gen2, unit_type), gen3))], ["setState", lambda_type(gen1, lambda_type(lambda_type(gen2, unit_type), unit_type))], ["onError", lambda_type(tuple_type(string_type, class_type("System.Exception")), unit_type)], ["termination", tuple_type(lambda_type(gen2, bool_type), lambda_type(gen1, unit_type))]]);
+}
+
+/**
+ * Typical program, new commands are produced by `init` and `update` along with the new state.
+ */
+export function ProgramModule_mkProgram(init, update, view) {
+    return new Program$4(init, update, (_arg) => Sub_none(), view, uncurry2((model) => {
+        const f1 = curry2(view)(model);
+        return (arg) => {
+            f1(arg);
+        };
+    }), (tupledArg) => {
+        Log_onError(tupledArg[0], tupledArg[1]);
+    }, [(_arg_1) => false, (value_1) => {
+    }]);
+}
+
+/**
+ * Simple program that produces only new state with `init` and `update`.
+ */
+export function ProgramModule_mkSimple(init, update, view) {
+    return new Program$4((arg) => [init(arg), Cmd_none()], uncurry2((msg) => {
+        const f1_1 = curry2(update)(msg);
+        return (arg_1) => [f1_1(arg_1), Cmd_none()];
+    }), (_arg) => Sub_none(), view, uncurry2((model) => {
+        const f1_2 = curry2(view)(model);
+        return (arg_2) => {
+            f1_2(arg_2);
+        };
+    }), (tupledArg) => {
+        Log_onError(tupledArg[0], tupledArg[1]);
+    }, [(_arg_1) => false, (value_1) => {
+    }]);
+}
+
+/**
+ * Subscribe to external source of events, overrides existing subscription.
+ * Return the subscriptions that should be active based on the current model.
+ * Subscriptions will be started or stopped automatically to match.
+ */
+export function ProgramModule_withSubscription(subscribe, program) {
+    return new Program$4(program.init, program.update, subscribe, program.view, program.setState, program.onError, program.termination);
+}
+
+/**
+ * Map existing subscription to external source of events.
+ */
+export function ProgramModule_mapSubscription(map, program) {
+    return new Program$4(program.init, program.update, curry2(map)(program.subscribe), program.view, program.setState, program.onError, program.termination);
+}
+
+/**
+ * Trace all the updates to the console
+ */
+export function ProgramModule_withConsoleTrace(program) {
+    return new Program$4((arg) => {
+        const patternInput = program.init(arg);
+        const initModel = patternInput[0];
+        Log_toConsole("Initial state:", initModel);
+        return [initModel, patternInput[1]];
+    }, (msg, model) => {
+        Log_toConsole("New message:", msg);
+        const patternInput_1 = program.update(msg, model);
+        const newModel = patternInput_1[0];
+        Log_toConsole("Updated state:", newModel);
+        return [newModel, patternInput_1[1]];
+    }, (model_1) => {
+        const sub = program.subscribe(model_1);
+        Log_toConsole("Updated subs:", map_1((tuple) => tuple[0], sub));
+        return sub;
+    }, program.view, program.setState, program.onError, program.termination);
+}
+
+/**
+ * Trace all the messages as they update the model and subscriptions
+ */
+export function ProgramModule_withTrace(trace, program) {
+    return new Program$4(program.init, (msg, model) => {
+        const patternInput = program.update(msg, model);
+        const state = patternInput[0];
+        trace(msg, state, map_1((tuple) => tuple[0], program.subscribe(state)));
+        return [state, patternInput[1]];
+    }, program.subscribe, program.view, program.setState, program.onError, program.termination);
+}
+
+/**
+ * Handle dispatch loop exceptions
+ */
+export function ProgramModule_withErrorHandler(onError, program) {
+    return new Program$4(program.init, program.update, program.subscribe, program.view, program.setState, onError, program.termination);
+}
+
+/**
+ * Exit criteria and the handler, overrides existing.
+ */
+export function ProgramModule_withTermination(predicate, terminate, program) {
+    return new Program$4(program.init, program.update, program.subscribe, program.view, program.setState, program.onError, [predicate, terminate]);
+}
+
+/**
+ * Map existing criteria and the handler.
+ */
+export function ProgramModule_mapTermination(map, program) {
+    return new Program$4(program.init, program.update, program.subscribe, program.view, program.setState, program.onError, map(program.termination));
+}
+
+/**
+ * Map existing error handler and return new `Program`
+ */
+export function ProgramModule_mapErrorHandler(map, program) {
+    return new Program$4(program.init, program.update, program.subscribe, program.view, program.setState, curry2(map)(program.onError), program.termination);
+}
+
+/**
+ * Get the current error handler
+ */
+export function ProgramModule_onError(program) {
+    return program.onError;
+}
+
+/**
+ * Function to render the view with the latest state
+ */
+export function ProgramModule_withSetState(setState, program) {
+    return new Program$4(program.init, program.update, program.subscribe, program.view, setState, program.onError, program.termination);
+}
+
+/**
+ * Return the function to render the state
+ */
+export function ProgramModule_setState(program) {
+    return curry2(program.setState);
+}
+
+/**
+ * Return the view function
+ */
+export function ProgramModule_view(program) {
+    return curry2(program.view);
+}
+
+/**
+ * Return the init function
+ */
+export function ProgramModule_init(program) {
+    return program.init;
+}
+
+/**
+ * Return the update function
+ */
+export function ProgramModule_update(program) {
+    return curry2(program.update);
+}
+
+/**
+ * Map the program type
+ */
+export function ProgramModule_map(mapInit, mapUpdate, mapView, mapSetState, mapSubscribe, mapTermination, program) {
+    const init = curry2(mapInit)(program.init);
+    const update = curry3(mapUpdate)(curry2(program.update));
+    const view = curry3(mapView)(curry2(program.view));
+    const setState = curry3(mapSetState)(curry2(program.setState));
+    return new Program$4(init, uncurry2(update), curry2(mapSubscribe)(program.subscribe), uncurry2(view), uncurry2(setState), program.onError, mapTermination(program.termination));
+}
+
+/**
+ * Start the program loop.
+ * syncDispatch: specify how to serialize dispatch calls.
+ * arg: argument to pass to the init() function.
+ * program: program created with 'mkSimple' or 'mkProgram'.
+ */
+export function ProgramModule_runWithDispatch(syncDispatch, arg, program) {
+    let tupledArg_1;
+    const patternInput = program.init(arg);
+    const model = patternInput[0];
+    const sub = program.subscribe(model);
+    const patternInput_1 = program.termination;
+    const rb = RingBuffer$1_$ctor_Z524259A4(10);
+    let reentered = false;
+    let state = model;
+    let activeSubs = Sub_Internal_empty;
+    let terminated = false;
+    const dispatch = (msg) => {
+        if (!terminated) {
+            RingBuffer$1__Push_2B595(rb, msg);
+            if (!reentered) {
+                reentered = true;
+                processMsgs();
+                reentered = false;
+            }
+        }
+    };
+    const dispatch$0027 = curry2(syncDispatch)(dispatch);
+    const processMsgs = () => {
+        let tupledArg;
+        let nextMsg = RingBuffer$1__Pop(rb);
+        while (!terminated && (nextMsg != null)) {
+            const msg_1 = value_2(nextMsg);
+            if (patternInput_1[0](msg_1)) {
+                Sub_Internal_Fx_stop(program.onError, activeSubs);
+                patternInput_1[1](state);
+                terminated = true;
+            }
+            else {
+                const patternInput_2 = program.update(msg_1, state);
+                const model$0027 = patternInput_2[0];
+                const sub$0027 = program.subscribe(model$0027);
+                program.setState(model$0027, dispatch$0027);
+                Cmd_exec((ex) => {
+                    program.onError([toText(printf("Error handling the message: %A"))(msg_1), ex]);
+                }, dispatch$0027, patternInput_2[1]);
+                state = model$0027;
+                activeSubs = ((tupledArg = Sub_Internal_diff(activeSubs, sub$0027), Sub_Internal_Fx_change(program.onError, dispatch$0027, tupledArg[0], tupledArg[1], tupledArg[2], tupledArg[3])));
+                nextMsg = RingBuffer$1__Pop(rb);
+            }
+        }
+    };
+    reentered = true;
+    program.setState(model, dispatch$0027);
+    Cmd_exec((ex_1) => {
+        program.onError([toText(printf("Error intitializing:")), ex_1]);
+    }, dispatch$0027, patternInput[1]);
+    activeSubs = ((tupledArg_1 = Sub_Internal_diff(activeSubs, sub), Sub_Internal_Fx_change(program.onError, dispatch$0027, tupledArg_1[0], tupledArg_1[1], tupledArg_1[2], tupledArg_1[3])));
+    processMsgs();
+    reentered = false;
+}
+
+/**
+ * Start the single-threaded dispatch loop.
+ * arg: argument to pass to the 'init' function.
+ * program: program created with 'mkSimple' or 'mkProgram'.
+ */
+export function ProgramModule_runWith(arg, program) {
+    ProgramModule_runWithDispatch(uncurry2((x) => x), arg, program);
+}
+
+/**
+ * Start the dispatch loop with `unit` for the init() function.
+ */
+export function ProgramModule_run(program) {
+    ProgramModule_runWith(undefined, program);
+}
+
+
+ù
+n/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.Elmish.4.0.0/ring.fs†import { Union } from "../../../node_modules/@fable-org/fable-library-js/Types.js";
+import { class_type, union_type, int32_type, array_type } from "../../../node_modules/@fable-org/fable-library-js/Reflection.js";
+import { setItem, item as item_1, fill } from "../../../node_modules/@fable-org/fable-library-js/Array.js";
+import { max } from "../../../node_modules/@fable-org/fable-library-js/Double.js";
+import { some } from "../../../node_modules/@fable-org/fable-library-js/Option.js";
+import { singleton, collect, take, skip, append, delay } from "../../../node_modules/@fable-org/fable-library-js/Seq.js";
+import { defaultOf } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+import { rangeDouble } from "../../../node_modules/@fable-org/fable-library-js/Range.js";
+
+export class RingState$1 extends Union {
+    constructor(tag, fields) {
+        super();
+        this.tag = tag;
+        this.fields = fields;
+    }
+    cases() {
+        return ["Writable", "ReadWritable"];
+    }
+}
+
+export function RingState$1_$reflection(gen0) {
+    return union_type("Elmish.RingState`1", [gen0], RingState$1, () => [[["wx", array_type(gen0)], ["ix", int32_type]], [["rw", array_type(gen0)], ["wix", int32_type], ["rix", int32_type]]]);
+}
+
+export class RingBuffer$1 {
+    constructor(size) {
+        this.state = (new RingState$1(0, [fill(new Array(max(size, 10)), 0, max(size, 10), null), 0]));
+    }
+}
+
+export function RingBuffer$1_$reflection(gen0) {
+    return class_type("Elmish.RingBuffer`1", [gen0], RingBuffer$1);
+}
+
+export function RingBuffer$1_$ctor_Z524259A4(size) {
+    return new RingBuffer$1(size);
+}
+
+export function RingBuffer$1__Pop(__) {
+    const matchValue = __.state;
+    if (matchValue.tag === 1) {
+        const wix = matchValue.fields[1] | 0;
+        const rix = matchValue.fields[2] | 0;
+        const items = matchValue.fields[0];
+        const rix$0027 = ((rix + 1) % items.length) | 0;
+        if (rix$0027 === wix) {
+            __.state = (new RingState$1(0, [items, wix]));
+        }
+        else {
+            __.state = (new RingState$1(1, [items, wix, rix$0027]));
+        }
+        return some(item_1(rix, items));
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function RingBuffer$1__Push_2B595(__, item) {
+    const matchValue = __.state;
+    if (matchValue.tag === 1) {
+        const wix_1 = matchValue.fields[1] | 0;
+        const rix = matchValue.fields[2] | 0;
+        const items_1 = matchValue.fields[0];
+        setItem(items_1, wix_1, item);
+        const wix$0027 = ((wix_1 + 1) % items_1.length) | 0;
+        if (wix$0027 === rix) {
+            __.state = (new RingState$1(1, [RingBuffer$1__doubleSize(__, rix, items_1), items_1.length, 0]));
+        }
+        else {
+            __.state = (new RingState$1(1, [items_1, wix$0027, rix]));
+        }
+    }
+    else {
+        const ix = matchValue.fields[1] | 0;
+        const items = matchValue.fields[0];
+        setItem(items, ix, item);
+        const wix = ((ix + 1) % items.length) | 0;
+        __.state = (new RingState$1(1, [items, wix, ix]));
+    }
+}
+
+export function RingBuffer$1__doubleSize(this$, ix, items) {
+    return Array.from(delay(() => append(skip(ix, items), delay(() => append(take(ix, items), delay(() => collect((matchValue) => singleton(defaultOf()), rangeDouble(0, 1, items.length))))))));
+}
+
+
+‰ 
+m/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.Elmish.4.0.0/sub.fs—import { filter, partition, foldBack, choose, append, iterate, cons, map, concat, empty } from "../../../node_modules/@fable-org/fable-library-js/List.js";
+import { join } from "../../../node_modules/@fable-org/fable-library-js/String.js";
+import { compare, disposeSafe } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+import { ofList, add, contains, empty as empty_1 } from "../../../node_modules/@fable-org/fable-library-js/Set.js";
+
+/**
+ * None - no subscriptions, also known as `[]`
+ */
+export function Sub_none() {
+    return empty();
+}
+
+/**
+ * Aggregate multiple subscriptions
+ */
+export function Sub_batch(subs) {
+    return concat(subs);
+}
+
+/**
+ * When emitting the message, map to another type.
+ * To avoid ID conflicts with other components, scope SubIds with a prefix.
+ */
+export function Sub_map(idPrefix, f, sub) {
+    return map((tupledArg) => [cons(idPrefix, tupledArg[0]), (dispatch) => tupledArg[1]((arg) => {
+        dispatch(f(arg));
+    })], sub);
+}
+
+export function Sub_Internal_SubId_toString(subId) {
+    return join("/", subId);
+}
+
+export function Sub_Internal_Fx_warnDupe(onError, subId) {
+    const ex = new Error("Duplicate SubId");
+    return onError(["Duplicate SubId: " + Sub_Internal_SubId_toString(subId), ex]);
+}
+
+export function Sub_Internal_Fx_tryStop(onError, subId, sub) {
+    try {
+        disposeSafe(sub);
+    }
+    catch (ex) {
+        onError(["Error stopping subscription: " + Sub_Internal_SubId_toString(subId), ex]);
+    }
+}
+
+export function Sub_Internal_Fx_tryStart(onError, dispatch, subId, start) {
+    try {
+        return [subId, start(dispatch)];
+    }
+    catch (ex) {
+        onError(["Error starting subscription: " + Sub_Internal_SubId_toString(subId), ex]);
+        return undefined;
+    }
+}
+
+export function Sub_Internal_Fx_stop(onError, subs) {
+    iterate((tupledArg) => {
+        Sub_Internal_Fx_tryStop(onError, tupledArg[0], tupledArg[1]);
+    }, subs);
+}
+
+export function Sub_Internal_Fx_change(onError, dispatch, dupes, toStop, toKeep, toStart) {
+    iterate((subId) => {
+        Sub_Internal_Fx_warnDupe(onError, subId);
+    }, dupes);
+    iterate((tupledArg) => {
+        Sub_Internal_Fx_tryStop(onError, tupledArg[0], tupledArg[1]);
+    }, toStop);
+    return append(toKeep, choose((tupledArg_1) => Sub_Internal_Fx_tryStart(onError, dispatch, tupledArg_1[0], tupledArg_1[1]), toStart));
+}
+
+export function Sub_Internal_NewSubs_init() {
+    return [empty(), empty_1({
+        Compare: compare,
+    }), empty()];
+}
+
+export function Sub_Internal_NewSubs__newSubs() {
+    return Sub_Internal_NewSubs_init()[2];
+}
+
+export function Sub_Internal_NewSubs__newKeys() {
+    return Sub_Internal_NewSubs_init()[1];
+}
+
+export function Sub_Internal_NewSubs__dupes() {
+    return Sub_Internal_NewSubs_init()[0];
+}
+
+export function Sub_Internal_NewSubs_update(subId, start, dupes, newKeys, newSubs) {
+    if (contains(subId, newKeys)) {
+        return [cons(subId, dupes), newKeys, newSubs];
+    }
+    else {
+        return [dupes, add(subId, newKeys), cons([subId, start], newSubs)];
+    }
+}
+
+export function Sub_Internal_NewSubs_calculate(subs) {
+    return foldBack((tupledArg, tupledArg_1) => Sub_Internal_NewSubs_update(tupledArg[0], tupledArg[1], tupledArg_1[0], tupledArg_1[1], tupledArg_1[2]), subs, Sub_Internal_NewSubs_init());
+}
+
+export const Sub_Internal_empty = empty();
+
+export function Sub_Internal_diff(activeSubs, sub) {
+    const keys = ofList(map((tuple) => tuple[0], activeSubs), {
+        Compare: compare,
+    });
+    const patternInput = Sub_Internal_NewSubs_calculate(sub);
+    const newKeys = patternInput[1];
+    const dupes = patternInput[0];
+    if (keys.Equals(newKeys)) {
+        return [dupes, empty(), activeSubs, empty()];
+    }
+    else {
+        const patternInput_1 = partition((tupledArg) => contains(tupledArg[0], newKeys), activeSubs);
+        return [dupes, patternInput_1[1], patternInput_1[0], filter((tupledArg_1) => !contains(tupledArg_1[0], keys), patternInput[2])];
+    }
+}
+
+
+Œ
+†/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.React.Types.18.3.0/Fable.React.Extensions.fs
+
+½
+/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.React.Types.18.3.0/Fable.React.Hooks.fs¶
+function HookBindings_makeDummyStateHook(value) {
+    return {
+        current: value,
+        update(x) {
+        },
+        update(f) {
+        },
+    };
+}
+
+function HookBindings_makeDummyReducerHook(state) {
+    return {
+        current: state,
+        update(msg) {
+        },
+    };
+}
+
+function HookBindings_makeDummyTransitionHook() {
+    return {
+        isPending: false,
+        startTransition(callback) {
+        },
+    };
+}
+
+
+Î
+{/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.React.Types.18.3.0/Fable.React.fsÎimport { Record } from "../../../node_modules/@fable-org/fable-library-js/Types.js";
+import { record_type, string_type } from "../../../node_modules/@fable-org/fable-library-js/Reflection.js";
+
+export class FragmentProps extends Record {
+    constructor(key) {
+        super();
+        this.key = key;
+    }
+}
+
+export function FragmentProps_$reflection() {
+    return record_type("Fable.React.FragmentProps", [], FragmentProps, () => [["key", string_type]]);
+}
+
+
+‡
+/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Fable.ReactDom.Types.18.2.0/Fable.ReactDom.fs
+
+s
+n/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/BorderStyle.fs
+
+
+i/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Colors.fsŸ
+/**
+ * Creates a color from components [hue](https://en.wikipedia.org/wiki/Hue), [saturation](https://en.wikipedia.org/wiki/Colorfulness) and [lightness](https://en.wikipedia.org/wiki/Lightness) where hue is a number that goes from 0 to 360 and both
+ * the `saturation` and `lightness` go from 0 to 100 as they are percentages.
+ */
+export function hsl(hue, saturation, lightness) {
+    return ((((("hsl(" + hue) + ",") + saturation) + "%,") + lightness) + "%)";
+}
+
+export function rgb(r, g, b) {
+    return ((((("rgb(" + r) + ",") + g) + ",") + b) + ")";
+}
+
+export function rgba(r, g, b, a) {
+    return ((((((("rgba(" + r) + ",") + g) + ",") + b) + ",") + a) + ")";
+}
+
+
+ùÜ
+n/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/DateParsing.fs…Üimport { some } from "../../../node_modules/@fable-org/fable-library-js/Option.js";
+import { create, isLeapYear as isLeapYear_1 } from "../../../node_modules/@fable-org/fable-library-js/Date.js";
+import { parse as parse_1 } from "../../../node_modules/@fable-org/fable-library-js/Int32.js";
+import { split, isNullOrWhiteSpace } from "../../../node_modules/@fable-org/fable-library-js/String.js";
+import { item, equalsWith } from "../../../node_modules/@fable-org/fable-library-js/Array.js";
+import { defaultOf } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+
+export function $007CBetween$007C_$007C(x, y, input) {
+    if ((input >= x) && (input <= y)) {
+        return some(undefined);
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function isLeapYear(year) {
+    return isLeapYear_1(year);
+}
+
+export function $007CInt$007C_$007C(input) {
+    try {
+        return parse_1(input, 511, false, 32);
+    }
+    catch (matchValue) {
+        return undefined;
+    }
+}
+
+/**
+ * Parses a specific yyyy-MM-dd or yyyy-MM-ddTHH:mm date format that comes out of an input element with type="date"
+ */
+export function parse(input) {
+    try {
+        if (isNullOrWhiteSpace(input)) {
+            return undefined;
+        }
+        else {
+            const parts = split(input, ["-"], undefined, 0);
+            let patternInput;
+            let matchResult, month, year;
+            if (!equalsWith((x, y) => (x === y), parts, defaultOf()) && (parts.length === 2)) {
+                const activePatternResult = $007CInt$007C_$007C(item(0, parts));
+                if (activePatternResult != null) {
+                    const activePatternResult_1 = $007CInt$007C_$007C(item(1, parts));
+                    if (activePatternResult_1 != null) {
+                        matchResult = 0;
+                        month = activePatternResult_1;
+                        year = activePatternResult;
+                    }
+                    else {
+                        matchResult = 1;
+                    }
+                }
+                else {
+                    matchResult = 1;
+                }
+            }
+            else {
+                matchResult = 1;
+            }
+            switch (matchResult) {
+                case 0: {
+                    patternInput = [year, month, 1, 0, 0];
+                    break;
+                }
+                default: {
+                    let matchResult_1, day, month_1, year_1;
+                    if (!equalsWith((x_1, y_1) => (x_1 === y_1), parts, defaultOf()) && (parts.length === 3)) {
+                        const activePatternResult_2 = $007CInt$007C_$007C(item(0, parts));
+                        if (activePatternResult_2 != null) {
+                            const activePatternResult_3 = $007CInt$007C_$007C(item(1, parts));
+                            if (activePatternResult_3 != null) {
+                                const activePatternResult_4 = $007CInt$007C_$007C(item(2, parts));
+                                if (activePatternResult_4 != null) {
+                                    matchResult_1 = 0;
+                                    day = activePatternResult_4;
+                                    month_1 = activePatternResult_3;
+                                    year_1 = activePatternResult_2;
+                                }
+                                else {
+                                    matchResult_1 = 1;
+                                }
+                            }
+                            else {
+                                matchResult_1 = 1;
+                            }
+                        }
+                        else {
+                            matchResult_1 = 1;
+                        }
+                    }
+                    else {
+                        matchResult_1 = 1;
+                    }
+                    switch (matchResult_1) {
+                        case 0: {
+                            patternInput = [year_1, month_1, day, 0, 0];
+                            break;
+                        }
+                        default: {
+                            let matchResult_2, day_1, month_2, year_2;
+                            if (!equalsWith((x_2, y_2) => (x_2 === y_2), parts, defaultOf()) && (parts.length === 3)) {
+                                const activePatternResult_5 = $007CInt$007C_$007C(item(0, parts));
+                                if (activePatternResult_5 != null) {
+                                    const activePatternResult_6 = $007CInt$007C_$007C(item(1, parts));
+                                    if (activePatternResult_6 != null) {
+                                        matchResult_2 = 0;
+                                        day_1 = item(2, parts);
+                                        month_2 = activePatternResult_6;
+                                        year_2 = activePatternResult_5;
+                                    }
+                                    else {
+                                        matchResult_2 = 1;
+                                    }
+                                }
+                                else {
+                                    matchResult_2 = 1;
+                                }
+                            }
+                            else {
+                                matchResult_2 = 1;
+                            }
+                            switch (matchResult_2) {
+                                case 0: {
+                                    if (day_1.indexOf("T") >= 0) {
+                                        const matchValue = split(day_1, ["T"], undefined, 0);
+                                        let matchResult_3, parsedDay, time;
+                                        if (!equalsWith((x_3, y_3) => (x_3 === y_3), matchValue, defaultOf()) && (matchValue.length === 2)) {
+                                            const activePatternResult_7 = $007CInt$007C_$007C(item(0, matchValue));
+                                            if (activePatternResult_7 != null) {
+                                                matchResult_3 = 0;
+                                                parsedDay = activePatternResult_7;
+                                                time = item(1, matchValue);
+                                            }
+                                            else {
+                                                matchResult_3 = 1;
+                                            }
+                                        }
+                                        else {
+                                            matchResult_3 = 1;
+                                        }
+                                        switch (matchResult_3) {
+                                            case 0: {
+                                                const matchValue_1 = split(time, [":"], undefined, 0);
+                                                let matchResult_4, hour, minute;
+                                                if (!equalsWith((x_4, y_4) => (x_4 === y_4), matchValue_1, defaultOf()) && (matchValue_1.length === 2)) {
+                                                    const activePatternResult_8 = $007CInt$007C_$007C(item(0, matchValue_1));
+                                                    if (activePatternResult_8 != null) {
+                                                        const activePatternResult_9 = $007CInt$007C_$007C(item(1, matchValue_1));
+                                                        if (activePatternResult_9 != null) {
+                                                            matchResult_4 = 0;
+                                                            hour = activePatternResult_8;
+                                                            minute = activePatternResult_9;
+                                                        }
+                                                        else {
+                                                            matchResult_4 = 1;
+                                                        }
+                                                    }
+                                                    else {
+                                                        matchResult_4 = 1;
+                                                    }
+                                                }
+                                                else {
+                                                    matchResult_4 = 1;
+                                                }
+                                                switch (matchResult_4) {
+                                                    case 0: {
+                                                        let matchResult_5;
+                                                        if ($007CBetween$007C_$007C(0, 59, hour) != null) {
+                                                            if ($007CBetween$007C_$007C(0, 59, minute) != null) {
+                                                                matchResult_5 = 0;
+                                                            }
+                                                            else {
+                                                                matchResult_5 = 1;
+                                                            }
+                                                        }
+                                                        else {
+                                                            matchResult_5 = 1;
+                                                        }
+                                                        switch (matchResult_5) {
+                                                            case 0: {
+                                                                patternInput = [year_2, month_2, parsedDay, hour, minute];
+                                                                break;
+                                                            }
+                                                            default:
+                                                                patternInput = [-1, 1, 1, 0, 0];
+                                                        }
+                                                        break;
+                                                    }
+                                                    default:
+                                                        patternInput = [-1, 1, 1, 0, 0];
+                                                }
+                                                break;
+                                            }
+                                            default:
+                                                patternInput = [-1, 1, 1, 0, 0];
+                                        }
+                                    }
+                                    else {
+                                        patternInput = [-1, 1, 1, 0, 0];
+                                    }
+                                    break;
+                                }
+                                default:
+                                    patternInput = [-1, 1, 1, 0, 0];
+                            }
+                        }
+                    }
+                }
+            }
+            const year_3 = patternInput[0] | 0;
+            const month_3 = patternInput[1] | 0;
+            const minute_1 = patternInput[4] | 0;
+            const hour_1 = patternInput[3] | 0;
+            const day_2 = patternInput[2] | 0;
+            return (year_3 <= 0) ? undefined : ((month_3 === 2) ? (($007CBetween$007C_$007C(1, 29, day_2) != null) ? (isLeapYear(year_3) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 2) ? (($007CBetween$007C_$007C(1, 28, day_2) != null) ? (!isLeapYear(year_3) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined)))))))))))) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined)))))))))))) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))))))))))) : ((month_3 === 2) ? (($007CBetween$007C_$007C(1, 28, day_2) != null) ? (!isLeapYear(year_3) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined)))))))))))) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined)))))))))))) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))))))))))) : ((month_3 === 2) ? (($007CBetween$007C_$007C(1, 28, day_2) != null) ? (!isLeapYear(year_3) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined)))))))))))) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined)))))))))))) : ((month_3 === 1) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 3) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 5) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 7) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 8) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 10) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 12) ? (($007CBetween$007C_$007C(1, 31, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined))))) : ((month_3 === 4) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 6) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 9) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : ((month_3 === 11) ? (($007CBetween$007C_$007C(1, 30, day_2) != null) ? create(year_3, month_3, day_2, hour_1, minute_1, 0) : undefined) : undefined)))))))))))));
+        }
+    }
+    catch (matchValue_4) {
+        return undefined;
+    }
+}
+
+
+m
+h/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Fonts.fs
+
+q
+l/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/GridTypes.fs
+
+ì
+j/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Helpers.fsýimport { iterate } from "../../../node_modules/@fable-org/fable-library-js/Seq.js";
+import { disposeSafe } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+import { toArray } from "../../../node_modules/@fable-org/fable-library-js/Option.js";
+
+export function optDispose(disposeOption) {
+    return {
+        Dispose() {
+            iterate((d) => {
+                let copyOfStruct = d;
+                disposeSafe(copyOfStruct);
+            }, toArray(disposeOption));
+        },
+    };
+}
+
+
+l
+g/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Html.fs
+
+Á%
+k/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Internal.fsÑ$import { iterate } from "../../../node_modules/@fable-org/fable-library-js/Seq.js";
+import { some, map, defaultArg, toArray } from "../../../node_modules/@fable-org/fable-library-js/Option.js";
+import { reactApi } from "./Interop.fs";
+import { defaultOf, curry2, uncurry2 } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+import { useLayoutEffect, useEffectWithDeps } from "./ReactInterop.js";
+import { optDispose } from "./Helpers.fs";
+import { cancel, createCancellationToken } from "../../../node_modules/@fable-org/fable-library-js/Async.js";
+
+export function propsWithKey(withKey, props) {
+    if (withKey == null) {
+        return props;
+    }
+    else {
+        const f = withKey;
+        props.key = f(props);
+        return props;
+    }
+}
+
+export function functionComponent(renderElement, name, withKey) {
+    iterate((name_1) => {
+        renderElement.displayName = name_1;
+    }, toArray(name));
+    return (props) => {
+        const props_2 = propsWithKey(withKey, props);
+        return reactApi.createElement(renderElement, props_2);
+    };
+}
+
+export function memo(renderElement, name, areEqual, withKey) {
+    const memoElementType = reactApi.memo(renderElement, uncurry2(defaultArg(map(curry2, areEqual), defaultOf())));
+    iterate((name_1) => {
+        renderElement.displayName = name_1;
+    }, toArray(name));
+    return (props) => {
+        const props_2 = propsWithKey(withKey, props);
+        return reactApi.createElement(memoElementType, props_2);
+    };
+}
+
+export function createDisposable(dispose) {
+    return {
+        Dispose() {
+            dispose();
+        },
+    };
+}
+
+export function useDisposable(dispose) {
+    const dependencies_1 = [dispose];
+    return reactApi.useMemo(() => createDisposable(dispose), dependencies_1);
+}
+
+export function useEffectOnce(effect) {
+    const calledOnce = reactApi.useRef(false);
+    reactApi.useEffect(() => {
+        if (!calledOnce.current) {
+            calledOnce.current = true;
+            effect();
+        }
+    }, []);
+}
+
+export function useEffectDisposableOnce(effect) {
+    const destroyFunc = reactApi.useRef(undefined);
+    const calledOnce = reactApi.useRef(false);
+    const renderAfterCalled = reactApi.useRef(false);
+    if (calledOnce.current) {
+        renderAfterCalled.current = true;
+    }
+    useEffectWithDeps(() => optDispose(calledOnce.current ? undefined : ((calledOnce.current = true, (destroyFunc.current = some(effect()), renderAfterCalled.current ? destroyFunc.current : undefined)))), []);
+}
+
+export function useEffectDisposableOptOnce(effect) {
+    const destroyFunc = reactApi.useRef(undefined);
+    const calledOnce = reactApi.useRef(false);
+    const renderAfterCalled = reactApi.useRef(false);
+    if (calledOnce.current) {
+        renderAfterCalled.current = true;
+    }
+    useEffectWithDeps(() => optDispose(calledOnce.current ? undefined : ((calledOnce.current = true, (destroyFunc.current = effect(), renderAfterCalled.current ? destroyFunc.current : undefined)))), []);
+}
+
+export function createContext(name, defaultValue) {
+    const contextObject = reactApi.createContext(defaultArg(defaultValue, void 0));
+    iterate((name_1) => {
+        contextObject.displayName = name_1;
+    }, toArray(name));
+    return contextObject;
+}
+
+export function useCallbackRef(callback) {
+    const lastRenderCallbackRef = reactApi.useRef(callback);
+    const callbackRef = reactApi.useCallback((arg) => lastRenderCallbackRef.current(arg), []);
+    useLayoutEffect((_arg) => {
+        lastRenderCallbackRef.current = callback;
+        return createDisposable(() => {
+        });
+    });
+    return callbackRef;
+}
+
+export function forwardRef(render) {
+    const forwardRefType = reactApi.forwardRef((props, ref) => render([props, ref]));
+    return (tupledArg) => {
+        const propsObj = Object.assign({}, tupledArg[0]);
+        propsObj.ref = tupledArg[1];
+        return reactApi.createElement(forwardRefType, propsObj);
+    };
+}
+
+export function forwardRefWithName(name, render) {
+    const forwardRefType = reactApi.forwardRef((props, ref) => render([props, ref]));
+    render.displayName = name;
+    return (tupledArg) => {
+        const propsObj = Object.assign({}, tupledArg[0]);
+        propsObj.ref = tupledArg[1];
+        return reactApi.createElement(forwardRefType, propsObj);
+    };
+}
+
+export function useCancellationToken() {
+    let cts;
+    const initialValue = createCancellationToken();
+    cts = (reactApi.useRef(initialValue));
+    let token;
+    const initialValue_1 = cts.current;
+    token = (reactApi.useRef(initialValue_1));
+    useEffectDisposableOnce(() => createDisposable(() => {
+        cancel(cts.current);
+    }));
+    return token;
+}
+
+
+ª
+j/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Interop.fs<import react from "react";
+
+export const reactApi = react;
+
+
+í
+f/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Key.fs‚
+function key_create(key) {
+    return [key, false, false];
+}
+
+export const key_enter = key_create("Enter");
+
+export const key_escape = key_create("Escape");
+
+export const key_one = key_create("1");
+
+export const key_two = key_create("2");
+
+export const key_three = key_create("3");
+
+export const key_four = key_create("4");
+
+export const key_five = key_create("5");
+
+export const key_six = key_create("6");
+
+export const key_seven = key_create("7");
+
+export const key_eight = key_create("8");
+
+export const key_nine = key_create("9");
+
+export const key_zero = key_create("0");
+
+export const key_backspace = key_create("Backspace");
+
+export const key_plus = key_create("+");
+
+export const key_minus = key_create("-");
+
+export const key_space = key_create(" ");
+
+export const key_tilde = key_create("~");
+
+export const key_backtick = key_create("`");
+
+export const key_a = key_create("a");
+
+export const key_b = key_create("b");
+
+export const key_c = key_create("c");
+
+export const key_d = key_create("d");
+
+export const key_e = key_create("e");
+
+export const key_f = key_create("f");
+
+export const key_g = key_create("g");
+
+export const key_h = key_create("h");
+
+export const key_i = key_create("i");
+
+export const key_j = key_create("j");
+
+export const key_k = key_create("k");
+
+export const key_l = key_create("l");
+
+export const key_m = key_create("m");
+
+export const key_n = key_create("n");
+
+export const key_o = key_create("o");
+
+export const key_p = key_create("p");
+
+export const key_q = key_create("q");
+
+export const key_r = key_create("r");
+
+export const key_s = key_create("s");
+
+export const key_t = key_create("t");
+
+export const key_u = key_create("u");
+
+export const key_v = key_create("v");
+
+export const key_w = key_create("w");
+
+export const key_x = key_create("x");
+
+export const key_y = key_create("y");
+
+export const key_z = key_create("z");
+
+export function key_ctrl(key) {
+    const patternInput = key;
+    return [patternInput[0], true, patternInput[2]];
+}
+
+export function key_shift(key) {
+    const patternInput = key;
+    return [patternInput[0], patternInput[1], true];
+}
+
+export function key_ctrlAndShift(key) {
+    return [key[0], true, true];
+}
+
+
+n
+i/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Length.fs
+
+€
+m/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Properties.fsŽimport { join } from "../../../node_modules/@fable-org/fable-library-js/String.js";
+import { length, ofArray, map } from "../../../node_modules/@fable-org/fable-library-js/List.js";
+import { milliseconds, seconds, minutes, hours } from "../../../node_modules/@fable-org/fable-library-js/TimeSpan.js";
+import { map as map_1 } from "../../../node_modules/@fable-org/fable-library-js/Seq.js";
+
+export function PropHelpers_createClockValue(duration) {
+    let i_1;
+    return (join(":", map((i) => ((i < 10) ? ("0" + i) : i), ofArray([hours(duration), minutes(duration), seconds(duration)]))) + ".") + ((i_1 = (milliseconds(duration) | 0), (i_1 < 10) ? ("0" + i_1) : i_1));
+}
+
+export function PropHelpers_createKeySplines(values) {
+    return join("; ", map_1((tupledArg) => ((((((tupledArg[0] + " ") + tupledArg[1]) + " ") + tupledArg[2]) + " ") + tupledArg[3]), values));
+}
+
+export function PropHelpers_createOnKey(key, handler, ev) {
+    const patternInput = key;
+    const shift = patternInput[2];
+    const pressedKey = patternInput[0];
+    let matchResult;
+    if (patternInput[1]) {
+        if (shift) {
+            if (((pressedKey.toLocaleLowerCase() === ev.key.toLocaleLowerCase()) && ev.ctrlKey) && ev.shiftKey) {
+                matchResult = 0;
+            }
+            else {
+                matchResult = 4;
+            }
+        }
+        else if ((pressedKey.toLocaleLowerCase() === ev.key.toLocaleLowerCase()) && ev.ctrlKey) {
+            matchResult = 1;
+        }
+        else {
+            matchResult = 4;
+        }
+    }
+    else if (shift) {
+        if ((pressedKey.toLocaleLowerCase() === ev.key.toLocaleLowerCase()) && ev.shiftKey) {
+            matchResult = 2;
+        }
+        else {
+            matchResult = 4;
+        }
+    }
+    else if (pressedKey.toLocaleLowerCase() === ev.key.toLocaleLowerCase()) {
+        matchResult = 3;
+    }
+    else {
+        matchResult = 4;
+    }
+    switch (matchResult) {
+        case 0: {
+            handler(ev);
+            break;
+        }
+        case 1: {
+            handler(ev);
+            break;
+        }
+        case 2: {
+            handler(ev);
+            break;
+        }
+        case 3: {
+            handler(ev);
+            break;
+        }
+        case 4: {
+            break;
+        }
+    }
+}
+
+export function PropHelpers_createPointsFloat(coordinates) {
+    return join(" ", map_1((tupledArg) => ((tupledArg[0] + ",") + tupledArg[1]), coordinates));
+}
+
+export function PropHelpers_createPointsInt(coordinates) {
+    return join(" ", map_1((tupledArg) => ((tupledArg[0] + ",") + tupledArg[1]), coordinates));
+}
+
+export function PropHelpers_createSvgPathFloat(path) {
+    return join("\n", map_1((tupledArg) => {
+        const cmdType = tupledArg[0];
+        const cmds = tupledArg[1];
+        if (length(cmds) === 0) {
+            return cmdType;
+        }
+        else {
+            return (cmdType + " ") + join(" ", map_1((arg) => join(",", arg), cmds));
+        }
+    }, path));
+}
+
+export function PropHelpers_createSvgPathInt(path) {
+    return join("\n", map_1((tupledArg) => {
+        const cmdType = tupledArg[0];
+        const cmds = tupledArg[1];
+        if (length(cmds) === 0) {
+            return cmdType;
+        }
+        else {
+            return (cmdType + " ") + join(" ", map_1((arg) => join(",", arg), cmds));
+        }
+    }, path));
+}
+
+
+m
+h/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/React.fs
+
+´
+k/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/ReactDOM.fsÄimport { class_type } from "../../../node_modules/@fable-org/fable-library-js/Reflection.js";
+import { render } from "react-dom";
+
+export class ReactDOM {
+    constructor() {
+    }
+}
+
+export function ReactDOM_$reflection() {
+    return class_type("Feliz.ReactDOM", undefined, ReactDOM);
+}
+
+export function ReactDOM_render_Z3D10464(element, container) {
+    return render(element(), container);
+}
+
+export class ReactDOMServer {
+    constructor() {
+    }
+}
+
+export function ReactDOMServer_$reflection() {
+    return class_type("Feliz.ReactDOMServer", undefined, ReactDOMServer);
+}
+
+
+t
+o/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/ReactInterop.fs
+
+r
+m/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/ReactTypes.fs
+
+r
+m/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/StyleTypes.fs
+
+n
+i/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Styles.fs
+
+à
+f/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Svg.fsõimport { class_type } from "../../../node_modules/@fable-org/fable-library-js/Reflection.js";
+
+export class Svg {
+    constructor() {
+    }
+}
+
+export function Svg_$reflection() {
+    return class_type("Feliz.Svg", undefined, Svg);
+}
+
+export class svg {
+    constructor() {
+    }
+}
+
+export function svg_$reflection() {
+    return class_type("Feliz.svg", undefined, svg);
+}
+
+
+z
+u/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/TextDecorationLine.fs
+
+{
+v/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/TextDecorationStyle.fs
+
+q
+l/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Transform.fs
+
+w
+r/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/TransformOrigin.fs
+
+z
+u/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/TransitionProperty.fs
+
+€
+{/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/TransitionTimingFunction.fs
+
+m
+h/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.2.9.0/Types.fs
+
+êV
+p/Users/admin/Repositories/fsharp-advent-calendar/FsharpAdvent2024/src/fable_modules/Feliz.Router.4.0.0/Router.fsõUimport { split, trimEnd, isNullOrWhiteSpace, substring, join } from "../../../node_modules/@fable-org/fable-library-js/String.js";
+import { ofArray, singleton, collect, head, empty, tail, isEmpty, reverse, map } from "../../../node_modules/@fable-org/fable-library-js/List.js";
+import { item, equalsWith } from "../../../node_modules/@fable-org/fable-library-js/Array.js";
+import { defaultOf } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+import { useEffectOnce, createDisposable, useEffectDisposableOnce, useCallbackRef, memo } from "../Feliz.2.9.0/Internal.fs";
+import { defaultArg } from "../../../node_modules/@fable-org/fable-library-js/Option.js";
+import { defaultOf as defaultOf_1 } from "../../../node_modules/@fable-org/fable-library-js/Util.js";
+import { tryParse } from "../../../node_modules/@fable-org/fable-library-js/Int32.js";
+import { FSharpRef } from "../../../node_modules/@fable-org/fable-library-js/Types.js";
+import { tryParse as tryParse_1 } from "../../../node_modules/@fable-org/fable-library-js/Long.js";
+import { tryParse as tryParse_2 } from "../../../node_modules/@fable-org/fable-library-js/Guid.js";
+import { tryParse as tryParse_3 } from "../../../node_modules/@fable-org/fable-library-js/Double.js";
+import { tryParse as tryParse_4 } from "../../../node_modules/@fable-org/fable-library-js/Decimal.js";
+import Decimal from "../../../node_modules/@fable-org/fable-library-js/Decimal.js";
+import { map as map_1, delay, toList } from "../../../node_modules/@fable-org/fable-library-js/Seq.js";
+
+export function RouterModule_String_$007CPrefix$007C(prefix, str) {
+    if (str.startsWith(prefix)) {
+        return str;
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function RouterModule_String_$007CSuffix$007C(suffix, str) {
+    if (str.endsWith(suffix)) {
+        return str;
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function RouterModule_encodeQueryString(queryStringPairs) {
+    const _arg = join("&", map((tupledArg) => join("=", [encodeURIComponent(tupledArg[0]), encodeURIComponent(tupledArg[1])]), queryStringPairs));
+    if (_arg === "") {
+        return "";
+    }
+    else {
+        return "?" + _arg;
+    }
+}
+
+export function RouterModule_encodeQueryStringInts(queryStringIntPairs) {
+    const _arg = join("&", map((tupledArg) => join("=", [encodeURIComponent(tupledArg[0]), tupledArg[1]]), queryStringIntPairs));
+    if (_arg === "") {
+        return "";
+    }
+    else {
+        return "?" + _arg;
+    }
+}
+
+function RouterModule_normalizeRoute(routeMode) {
+    if (routeMode === 1) {
+        return (_arg) => {
+            let activePatternResult, path, activePatternResult_1, path_1, activePatternResult_2, path_2;
+            return (activePatternResult = RouterModule_String_$007CPrefix$007C("/", _arg), (activePatternResult != null) ? ((path = activePatternResult, "#" + path)) : ((activePatternResult_1 = RouterModule_String_$007CPrefix$007C("#/", _arg), (activePatternResult_1 != null) ? ((path_1 = activePatternResult_1, path_1)) : ((activePatternResult_2 = RouterModule_String_$007CPrefix$007C("#", _arg), (activePatternResult_2 != null) ? ((path_2 = activePatternResult_2, "#/" + substring(path_2, 1, path_2.length - 1))) : ("#/" + _arg))))));
+        };
+    }
+    else {
+        return (_arg_1) => {
+            let activePatternResult_3, path_4;
+            return (activePatternResult_3 = RouterModule_String_$007CPrefix$007C("/", _arg_1), (activePatternResult_3 != null) ? ((path_4 = activePatternResult_3, path_4)) : ("/" + _arg_1));
+        };
+    }
+}
+
+export function RouterModule_encodeParts(xs, routeMode) {
+    return RouterModule_normalizeRoute(routeMode)(join("/", map((part) => {
+        if (((part.indexOf("?") >= 0) ? true : part.startsWith("#")) ? true : part.startsWith("/")) {
+            return part;
+        }
+        else {
+            return encodeURIComponent(part);
+        }
+    }, xs)));
+}
+
+/**
+ * Safely returns tuple of list items without last one and last item
+ */
+export function RouterModule_trySeparateLast(xs) {
+    const matchValue = reverse(xs);
+    if (!isEmpty(matchValue)) {
+        if (isEmpty(tail(matchValue))) {
+            return [empty(), head(matchValue)];
+        }
+        else {
+            return [reverse(tail(matchValue)), head(matchValue)];
+        }
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function RouterModule_nav(xs, mode, routeMode) {
+    if (mode === 1) {
+        history.pushState(undefined, "", RouterModule_encodeParts(xs, routeMode));
+    }
+    else {
+        history.replaceState(undefined, "", RouterModule_encodeParts(xs, routeMode));
+    }
+    const ev = document.createEvent("CustomEvent");
+    ev.initEvent("CUSTOM_NAVIGATION_EVENT", true, true);
+    window.dispatchEvent(ev);
+}
+
+/**
+ * Parses the URL into multiple path segments
+ */
+export function RouterModule_urlSegments(path, mode) {
+    return collect((segment) => {
+        if (isNullOrWhiteSpace(segment)) {
+            return empty();
+        }
+        else {
+            const segment_1 = trimEnd(segment, "#");
+            if (segment_1 === "?") {
+                return empty();
+            }
+            else if (RouterModule_String_$007CPrefix$007C("?", segment_1) != null) {
+                return singleton(segment_1);
+            }
+            else {
+                const matchValue = segment_1.split("?");
+                if (!equalsWith((x, y) => (x === y), matchValue, defaultOf()) && (matchValue.length === 1)) {
+                    const value = item(0, matchValue);
+                    return singleton(decodeURIComponent(value));
+                }
+                else if (!equalsWith((x_1, y_1) => (x_1 === y_1), matchValue, defaultOf()) && (matchValue.length === 2)) {
+                    if (item(1, matchValue) === "") {
+                        const value_1 = item(0, matchValue);
+                        return singleton(decodeURIComponent(value_1));
+                    }
+                    else {
+                        const value_2 = item(0, matchValue);
+                        const query = item(1, matchValue);
+                        return ofArray([decodeURIComponent(value_2), "?" + query]);
+                    }
+                }
+                else {
+                    return empty();
+                }
+            }
+        }
+    }, ofArray(split((RouterModule_String_$007CPrefix$007C("#", path) != null) ? substring(path, 1, path.length - 1) : ((mode === 1) ? ((RouterModule_String_$007CSuffix$007C("#", path) != null) ? "" : ((RouterModule_String_$007CSuffix$007C("#/", path) != null) ? "" : path)) : path), ["/"], undefined, 0)));
+}
+
+export function RouterModule_onUrlChange(routeMode, urlChanged, ev) {
+    return urlChanged(RouterModule_urlSegments((routeMode === 2) ? (window.location.pathname + window.location.search) : window.location.hash, routeMode));
+}
+
+export const RouterModule_router = memo((input) => {
+    const onChange = useCallbackRef((ev) => {
+        const urlChanged = defaultArg(input.onUrlChanged, (value) => {
+        });
+        RouterModule_onUrlChange(defaultArg(input.hashMode, 1), urlChanged, ev);
+    });
+    useEffectDisposableOnce(() => {
+        if (((window.navigator.userAgent).indexOf("Trident") >= 0) ? true : ((window.navigator.userAgent).indexOf("MSIE") >= 0)) {
+            window.addEventListener("hashchange", onChange);
+        }
+        else {
+            window.addEventListener("popstate", onChange);
+        }
+        window.addEventListener("CUSTOM_NAVIGATION_EVENT", onChange);
+        return createDisposable(() => {
+            if (((window.navigator.userAgent).indexOf("Trident") >= 0) ? true : ((window.navigator.userAgent).indexOf("MSIE") >= 0)) {
+                window.removeEventListener("hashchange", onChange);
+            }
+            else {
+                window.removeEventListener("popstate", onChange);
+            }
+            window.removeEventListener("CUSTOM_NAVIGATION_EVENT", onChange);
+        });
+    });
+    useEffectOnce(() => {
+        const ev_1 = document.createEvent("CustomEvent");
+        ev_1.initEvent("CUSTOM_NAVIGATION_EVENT", true, true);
+        window.dispatchEvent(ev_1);
+    });
+    const matchValue = input.application;
+    if (matchValue == null) {
+        return defaultOf_1();
+    }
+    else {
+        return matchValue;
+    }
+}, undefined, undefined, undefined);
+
+export function Route_$007CInt$007C_$007C(input) {
+    let matchValue;
+    let outArg = 0;
+    matchValue = [tryParse(input, 511, false, 32, new FSharpRef(() => outArg, (v) => {
+        outArg = (v | 0);
+    })), outArg];
+    if (matchValue[0]) {
+        return matchValue[1];
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function Route_$007CInt64$007C_$007C(input) {
+    let matchValue;
+    let outArg = 0n;
+    matchValue = [tryParse_1(input, 511, false, 64, new FSharpRef(() => outArg, (v) => {
+        outArg = v;
+    })), outArg];
+    if (matchValue[0]) {
+        return matchValue[1];
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function Route_$007CGuid$007C_$007C(input) {
+    let matchValue;
+    let outArg = "00000000-0000-0000-0000-000000000000";
+    matchValue = [tryParse_2(input, new FSharpRef(() => outArg, (v) => {
+        outArg = v;
+    })), outArg];
+    if (matchValue[0]) {
+        return matchValue[1];
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function Route_$007CNumber$007C_$007C(input) {
+    let matchValue;
+    let outArg = 0;
+    matchValue = [tryParse_3(input, new FSharpRef(() => outArg, (v) => {
+        outArg = v;
+    })), outArg];
+    if (matchValue[0]) {
+        return matchValue[1];
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function Route_$007CDecimal$007C_$007C(input) {
+    let matchValue;
+    let outArg = new Decimal("0");
+    matchValue = [tryParse_4(input, new FSharpRef(() => outArg, (v) => {
+        outArg = v;
+    })), outArg];
+    if (matchValue[0]) {
+        return matchValue[1];
+    }
+    else {
+        return undefined;
+    }
+}
+
+export function Route_$007CBool$007C_$007C(input) {
+    const matchValue = input.toLocaleLowerCase();
+    switch (matchValue) {
+        case "1":
+        case "true":
+            return true;
+        case "0":
+        case "false":
+            return false;
+        case "":
+            return true;
+        default:
+            return undefined;
+    }
+}
+
+/**
+ * Used to parse the query string parameter of the route.
+ * 
+ * For example to match against
+ * 
+ * `/users?id={value}`
+ * 
+ * You can pattern match:
+ * 
+ * `[ "users"; Route.Query [ "id", value ] ] -> value`
+ * 
+ * When `{value}` is an integer then you can pattern match:
+ * 
+ * `[ "users"; Route.Query [ "id", Route.Int userId ] ] -> userId`
+ */
+export function Route_$007CQuery$007C_$007C(input) {
+    try {
+        const urlParams = new URLSearchParams(input);
+        return toList(delay(() => map_1((entry) => [item(0, entry), item(1, entry)], urlParams.entries())));
+    }
+    catch (matchValue) {
+        return undefined;
+    }
+}
+
