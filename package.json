@@ -27,6 +27,7 @@
     "vite": "^6.0.1",
     "vite-plugin-fable": "^0.0.32",
     "@testing-library/react": "^13.4.0",
-    "vitest": "^0.33.0"
+    "vitest": "^0.33.0",
+    "jsdom": "^20.0.0"
   }
 }
