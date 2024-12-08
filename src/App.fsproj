@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Components.fs" />
     <Compile Include="App.fs" />
+    <Compile Include="Components.test.fs" />
+    <Compile Include="Counter.test.fs" />
   </ItemGroup>
 
   <ItemGroup>
