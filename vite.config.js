@@ -33,7 +33,6 @@ export default defineConfig({
    include: ['**/*.{test,spec}.{js,jsx,ts,tsx,fs}'],
    exclude: [...configDefaults.exclude, 'dist', '.idea', '.git', '.cache'],
    environment: 'jsdom',
-   setupFiles: ['./setupTests.js'],
    transform: {
      '^.+\\.fs$': 'vite-plugin-fable'
    }
