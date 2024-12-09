@@ -1,10 +1,14 @@
 module ComponentsTests
 
 // https://shmew.github.io/Fable.Jester/#/
+// here jest is used as vitest has much API compatibility
+
+// this is a 'hack' atm, 
+// to add extra bindings manually 
+// for API compat, see the file `vitest.ts`
 
 open Fable.ReactTestingLibrary
 open Fable.Jester
-open Feliz
 
 // Import the main app component
 open App
