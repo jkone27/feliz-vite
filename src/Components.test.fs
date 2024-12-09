@@ -1,5 +1,7 @@
 module ComponentsTests
 
+// https://shmew.github.io/Fable.Jester/#/
+
 open Fable.ReactTestingLibrary
 open Fable.Jester
 open Feliz
@@ -8,17 +10,17 @@ open Feliz
 open App
 
 Jest.describe("Counter component", fun () ->
+    let element = RTL.render(Components.Counter())
+        
     Jest.test("should render initial count", fun () ->
-        RTL.render(Components.Counter())
-        let countElement = RTL.screen.getByText("count is 0")
+        let countElement = element.getByText("count is 0")
         Jest.expect(countElement).toBeInTheDocument()
     )
 
     Jest.test("should increment count on button click", fun () ->
-        RTL.render(Components.Counter())
-        let buttonElement = RTL.screen.getByText("count is 0")
+        let buttonElement = element.getByRole("button" )
         RTL.fireEvent.click(buttonElement)
-        let updatedButtonElement = RTL.screen.getByText("count is 1")
+        let updatedButtonElement = element.getByText("count is 1")
         Jest.expect(updatedButtonElement).toBeInTheDocument()
     )
 )
