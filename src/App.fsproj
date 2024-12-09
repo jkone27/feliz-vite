@@ -6,8 +6,9 @@
 
   <ItemGroup>
     <Compile Include="Components.fs" />
-    <Compile Include="Components.test.fs" />
     <Compile Include="App.fs" />
+    <Compile Include="Vitest.fs" />
+    <Compile Include="Components.test.fs" />
   </ItemGroup>
 
   <ItemGroup>
