@@ -1,5 +1,7 @@
 # Feliz Vite (a happy life)
 
+![CI](https://github.com/jkone27/feliz-vite/actions/workflows/ci.yml/badge.svg)
+
 ![alt text](sample-splash-page.png)
 
 This template was created for a blog post for [fsAdvent calendar 2024](https://jkone27-3876.medium.com/feliz-navidad-fd1869b31044)
