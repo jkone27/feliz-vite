@@ -28,3 +28,23 @@ Jest.describe("Counter component", fun () ->
         Jest.expect(updatedButtonElement).toBeInTheDocument()
     )
 )
+
+Jest.describe("MaterialUiLogin component", fun () ->
+    let element = RTL.render(Components.MaterialUiLogin())
+
+    Jest.test("should render login form", fun () ->
+        let usernameLabel = element.getByText("Username")
+        let passwordLabel = element.getByText("Password")
+        let submitButton = element.getByText("Submit")
+        Jest.expect(usernameLabel).toBeInTheDocument()
+        Jest.expect(passwordLabel).toBeInTheDocument()
+        Jest.expect(submitButton).toBeInTheDocument()
+    )
+
+    Jest.test("should show success message on submit", fun () ->
+        let submitButton = element.getByText("Submit")
+        RTL.fireEvent.click(submitButton)
+        let successMessage = element.getByText("Login successful!")
+        Jest.expect(successMessage).toBeInTheDocument()
+    )
+)
