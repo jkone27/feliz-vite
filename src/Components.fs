@@ -70,3 +70,51 @@ type Components() =
                 prop.text " Click on the Vite, React or Fable Vite Plugin logos to learn more"
             ]
         ]
+
+    [<ReactComponent>]
+    static member MaterialUiLogin() =
+        let (username, setUsername) = React.useState("")
+        let (password, setPassword) = React.useState("")
+        let (message, setMessage) = React.useState("")
+
+        let handleSubmit (e: Browser.Types.Event) =
+            e.preventDefault()
+            setMessage("Login successful!")
+
+        Html.div [
+            Html.h2 "Login"
+            Html.form [
+                prop.onSubmit handleSubmit
+                prop.children [
+                    Html.div [
+                        Html.label [
+                            prop.htmlFor "username"
+                            prop.text "Username"
+                        ]
+                        Html.input [
+                            prop.id "username"
+                            prop.type' "text"
+                            prop.value username
+                            prop.onChange (fun (e: string) -> setUsername(e))
+                        ]
+                    ]
+                    Html.div [
+                        Html.label [
+                            prop.htmlFor "password"
+                            prop.text "Password"
+                        ]
+                        Html.input [
+                            prop.id "password"
+                            prop.type' "password"
+                            prop.value password
+                            prop.onChange (fun (e: string) -> setPassword(e))
+                        ]
+                    ]
+                    Html.button [
+                        prop.type' "submit"
+                        prop.text "Submit"
+                    ]
+                ]
+            ]
+            Html.p message
+        ]
