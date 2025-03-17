@@ -33,6 +33,7 @@
     "vite-plugin-fable": "^0.0.32",
     "vitest": "^2.1.8"
   },
+  "trustedDependencies": ["esbuild", "vite-plugin-fable"],
   "engines": {
     "node": ">=18"
   }
