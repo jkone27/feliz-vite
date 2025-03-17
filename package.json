@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "postinstall": "ts-node post-install.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -29,11 +30,16 @@
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.12.0",
     "jsdom": "^22.1.0",
+    "ora": "^8.2.0",
+    "ts-node": "^10.9.2",
     "vite": "^6.0.1",
     "vite-plugin-fable": "^0.0.32",
     "vitest": "^2.1.8"
   },
-  "trustedDependencies": ["esbuild", "vite-plugin-fable"],
+  "trustedDependencies": [
+    "esbuild",
+    "vite-plugin-fable"
+  ],
   "engines": {
     "node": ">=18"
   }

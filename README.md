@@ -34,7 +34,7 @@ npm i
 the first install process might take a while, please report issues if u find any, then:
 
 ```
-npm run dev
+VITE_PLUGIN_FABLE_DEBUG=1 npm run dev
 ```
 
 ## bun
