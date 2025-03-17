@@ -8,7 +8,7 @@ This template was created for a blog post for [fsAdvent calendar 2024](https://j
 
 The template provides a minimal setup to get React working in Vite with HMR and some ESLint rules, it starts from the basic vite template but it was adapted to run [F#](https://dotnet.microsoft.com/en-us/languages/fsharp) via [Fable](https://fable.io/), and use [Feliz](https://zaid-ajaj.github.io/Feliz/) library for awesome React built in F# DSL. 
 
-As an alternative to the official dotnet [template for Feliz](https://zaid-ajaj.github.io/Feliz/#/Feliz/ProjectTemplate) it adopts the remarkable [Vite Fable Plugin](https://nojaf.com/vite-plugin-fable/). 
+As an alternative to the official dotnet [template for Feliz](https://zaid-ajaj.github.io/Feliz/#/Feliz/ProjectTemplate) it adopts the remarkable [Vite Fable Plugin](https://fable.io/vite-plugin-fable/). 
 
 ![alt text](vite-fable-plugin.png) 
 
