@@ -39,11 +39,11 @@ type Components() =
                     ]
                 ]
                 Html.a [
-                    prop.href "https://nojaf.com/vite-plugin-fable"
+                    prop.href "https://fable.io/vite-plugin-fable"
                     prop.target "_blank"
                     prop.children [
                         Html.img [
-                            prop.src "https://nojaf.com/vite-plugin-fable/img/logo.png"
+                            prop.src "https://fable.io/vite-plugin-fable/img/logo.png"
                             prop.className "logo"
                             prop.alt "fable vite plugin logo"
                         ]
