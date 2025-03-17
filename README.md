@@ -28,7 +28,13 @@ Currently, two official plugins are available (for react):
 clone via git to use with `npm`, you can then install and run as usual 
 
 ```
-npm ci && npm run dev
+npm i
+```
+
+the first install process might take a while, please report issues if u find any, then:
+
+```
+npm run dev
 ```
 
 ## bun
