@@ -4,7 +4,16 @@ open Feliz
 open Fable.Core
 open Fable.Core.JsInterop
 
+module ViteConfig =
+    
+    let vitePluginFableV : string = 
+        let v = emitJsExpr () "__FABLE_VITE__"
+        printfn $"vite version is: {v}"
+        v
+
+
 type Components() = 
+
 
     [<ReactComponent>]
     static member Counter() =
@@ -13,7 +22,7 @@ type Components() =
         let viteLogo: unit -> unit = import "default" "./assets/vite.svg"
         let reactLogo: unit -> unit = import "default" "./assets/react.svg"
         importSideEffects "./App.css"
-        
+
         Html.div [
             Html.div [
                 Html.a [
@@ -48,6 +57,10 @@ type Components() =
                             prop.alt "fable vite plugin logo"
                         ]
                     ]
+                ]
+                Html.div [
+                    Html.h1 "version"
+                    Html.span ViteConfig.vitePluginFableV
                 ]
             ]
             Html.h1 "Vite + React + Feliz"
