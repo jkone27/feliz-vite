@@ -34,3 +34,5 @@ src/fable_modules
 ## lock files
 bun.lock
 package-lock.json
+
+.fake
