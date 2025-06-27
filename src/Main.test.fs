@@ -14,7 +14,7 @@ open Fable.Jester
 open App
 
 Jest.describe("Counter component", fun () ->
-    let element = RTL.render(Components.Counter())
+    let element = RTL.render(App.Main.El())
         
     Jest.test("should render initial count", fun () ->
         let countElement = element.getByText("count is 0")

@@ -4,12 +4,11 @@ open Feliz
 open Fable.Core
 open Fable.Core.JsInterop
 
-type Components() = 
+module Main =
 
     [<ReactComponent>]
-    static member Counter() =
-        let (count, setCount) = React.useState(0)
-
+    let El() =
+        
         let viteLogo: unit -> unit = import "default" "./assets/vite.svg"
         let reactLogo: unit -> unit = import "default" "./assets/react.svg"
         importSideEffects "./App.css"
@@ -51,20 +50,7 @@ type Components() =
                 ]
             ]
             Html.h1 "Vite + React + Feliz"
-            Html.div [
-                prop.className "card"
-                prop.children [
-                    Html.button [
-                        prop.onClick (fun _ -> setCount(count + 1))
-                        prop.text $"count is {count}"
-                    ]
-                    Html.p [
-                        Html.text "Edit "
-                        Html.code "src/App.fs"
-                        Html.text " and save to test HMR"
-                    ]
-                ]
-            ]
+            Components.Counter.El()
             Html.p [
                 prop.className "read-the-docs"
                 prop.text " Click on the Vite, React or Fable Vite Plugin logos to learn more"
